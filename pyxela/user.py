@@ -1,53 +1,37 @@
+from constants import PIXELA_ENDPOINT as endpoint
 import requests
-from constants import PIXELA_ENDPOINT, USER_TOKEN
-
-
-def handle_http_exceptions(fn):
-    def wrapper(*args, **kwargs):
-        try:
-            return fn(*args, **kwargs)
-        except requests.exceptions.HTTPError as e:
-            print(f"HTTP Error: {e}")
-            raise
-    return wrapper
-
 
 class User:
-    def __init__(self, token: str = None, username: str = None):
-        self.headers = {
-            USER_TOKEN: token
-        }
-
+    def __init__(self, username:str, token:str):
         self.token = token
         self.username = username
+        self.base_endpoint = endpoint
 
-    @handle_http_exceptions
-    def create(self):
-        if self.token and self.username:
-            user_params = {
-                'token': self.token,
-                'username': self.username,
-                'agreeTermsOfService': 'yes',
-                'notMinor': 'yes'
-            }
+    def create_user(self):
+        payload = {
+            "token": self.token,
+            "username": self.username,
+            "agreeTermsOfService": "yes",
+            "notMinor": "yes"
+        }
+        headers = {"Content-Type": "application/json"}
+        return requests.request("POST", self.base_endpoint, json=payload, headers=headers).json()
 
-            response = requests.post(url=PIXELA_ENDPOINT, json=user_params, headers=self.headers)
-            response.raise_for_status()
-
-    @handle_http_exceptions
-    def update(self, new_token: str):
-        self.headers = {
-            USER_TOKEN: self.token
+    def update_user(self, new_token:str):
+        payload = {"newToken": new_token}
+        headers = {
+            "X-USER-TOKEN": self.token,
+            "Content-Type": "application/json"
         }
 
-        user_params = {
-            'newToken': new_token
+        self.token = new_token
+        return requests.request("PUT", self.base_endpoint + f"{self.username}" , json=payload, headers=headers).json()
+
+    def delete_user(self):
+        headers = {
+            "X-USER-TOKEN": self.token,
+            "Content-Type": "application/json"
         }
 
-        response = requests.put(url=f'{PIXELA_ENDPOINT}{self.username}', json=user_params, headers=self.headers)
-        response.raise_for_status()
+        return requests.request("DELETE", self.base_endpoint + f"{self.username}" , headers=headers).json()
 
-    @handle_http_exceptions
-    def delete(self):
-        response = requests.delete(url=f'{PIXELA_ENDPOINT}{self.username}', headers=self.headers)
-        response.raise_for_status()
