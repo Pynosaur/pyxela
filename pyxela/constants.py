@@ -1,1 +1,1 @@
-PIXELA_ENDPOINT = 'https://pixe.la/v1/users/'
+ENDPOINT = 'https://pixe.la/v1/users/'

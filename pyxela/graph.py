@@ -1,28 +1,28 @@
 import requests
-from constants import PIXELA_ENDPOINT
+from constants import ENDPOINT
 from colors import Colors
 from enum import Enum
-
+from user import User, user7
 
 class GraphConfig(Enum):
-    id: str
-    name: str
-    unit: str
-    type: str
-    color: Colors
-
+    _id: str = ""
+    name: str = ""
+    unit: str = ""
+    _type: str = ""
+    color: Colors = ""
 
 class Graph:
-    def __init__(self, token, username):
-        self.token = token
-        self.base_endpoint = PIXELA_ENDPOINT + username + "/graphs"
+    def __init__(self, user: User):
+        self.token = user.token
+        self.endpoint = user.endpoint + user.username + "/graphs"
+        self.headers = user.headers
 
     def create_graph(
             self,
-            graph_id: GraphConfig.id,
+            graph_id: GraphConfig._id,
             graph_name: GraphConfig.name,
             unit: GraphConfig.unit,
-            _type: GraphConfig.type,
+            _type: GraphConfig._type,
             color: GraphConfig.color
     ):
 
@@ -33,19 +33,15 @@ class Graph:
             "type": _type,
             "color": color
         }
-        headers = {
-            "X-USER-TOKEN": self.token,
-            "Content-Type": "application/json"
-        }
 
-        return requests.request("POST", self.base_endpoint, json=payload, headers=headers).json()
+        return requests.request("POST", self.endpoint, json=payload, headers=self.headers).json()
 
     def update_graph(
             self,
-            graph_id: GraphConfig.id,
+            graph_id: GraphConfig._id,
             graph_name: GraphConfig.name,
             unit: GraphConfig.unit,
-            _type: GraphConfig.type,
+            _type: GraphConfig._type,
             color: GraphConfig.color
     ):
 
@@ -56,25 +52,16 @@ class Graph:
             "type": _type,
             "color": color
         }
-        headers = {
-            "X-USER-TOKEN": self.token,
-            "Content-Type": "application/json"
-        }
 
-        return requests.request("PUT", self.base_endpoint + f"/{graph_id}", json=payload, headers=headers).json()
+        return requests.request("PUT", self.endpoint + f"/{graph_id}", json=payload, headers=self.headers).json()
 
     def delete_graph(self, graph_id: str):
-
-        headers = {"X-USER-TOKEN": self.token}
-
-        return requests.request("DELETE", self.base_endpoint + f"/{graph_id}", headers=headers).json()
+        return requests.request("DELETE", self.endpoint + f"/{graph_id}", headers=self.headers).json()
 
     def get_graph_definitions(self):
-        headers = {"X-USER-TOKEN": self.token}
-
-        return requests.request("GET", self.base_endpoint, headers=headers).json()
+        return requests.request("GET", self.endpoint, headers=self.headers).json()
 
     def get_a_graph_definition(self, graph_id: str):
-        headers = {"X-USER-TOKEN": self.token}
+        return requests.request("GET", self.endpoint + f"/{graph_id}/graph-def", headers=self.headers).json()
 
-        return requests.request("GET", self.base_endpoint + f"/{graph_id}/graph-def", headers=headers).json()
+graph7 = Graph(user7)

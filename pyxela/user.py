@@ -1,12 +1,15 @@
-from constants import PIXELA_ENDPOINT
+from constants import ENDPOINT
 import requests
-
 
 class User:
     def __init__(self, username: str, token: str):
         self.token = token
         self.username = username
-        self.base_endpoint = PIXELA_ENDPOINT
+        self.endpoint = ENDPOINT
+        self.headers = {
+            "X-USER-TOKEN": self.token,
+            "Content-Type": "application/json"
+        }
 
     def create_user(self):
         payload = {
@@ -16,22 +19,18 @@ class User:
             "notMinor": "yes"
         }
         headers = {"Content-Type": "application/json"}
-        return requests.request("POST", self.base_endpoint, json=payload, headers=headers).json()
+
+        return requests.request("POST", self.endpoint, json=payload, headers=headers).json()
 
     def update_user(self, new_token: str):
         payload = {"newToken": new_token}
-        headers = {
-            "X-USER-TOKEN": self.token,
-            "Content-Type": "application/json"
-        }
+        response =  requests.request("PUT", self.endpoint + f"{self.username}", json=payload, headers=self.headers).json()
+        self.headers["X-USER-TOKEN"] = new_token
 
-        self.token = new_token
-        return requests.request("PUT", self.base_endpoint + f"{self.username}", json=payload, headers=headers).json()
+        return response
 
     def delete_user(self):
-        headers = {
-            "X-USER-TOKEN": self.token,
-            "Content-Type": "application/json"
-        }
 
-        return requests.request("DELETE", self.base_endpoint + f"{self.username}", headers=headers).json()
+        return requests.request("DELETE", self.endpoint + f"{self.username}", headers=self.headers).json()
+
+user7 = User("easyname777", "secrettoken")
