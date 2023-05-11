@@ -1,5 +1,4 @@
-from pyxela.client import Client
+from user import User
 
-
-c = Client(username='')
-print(c)
+# TODO: Create user
+u = User(username='testemarotodogarotoescroto', token='b1616eca-eb0d-4a5c-aebc-e83ec924d6f1')
